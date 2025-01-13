@@ -17,7 +17,7 @@ pip install -r requirements.txt
 ![folder_contents.png](doc%2Ffolder_contents.png)
 
 程序会读取`depth`、`disp`、`left`开头的文件，对应`深度图`、`视差图`、`左图`，其中`深度图`支持`png`格式的`16bit`
-图像，其中`视差图`支持`pfm/tiff`格式的`float32`图像，请固定文件的开头，并保证`深度图`、`视差图`、`左图`的后缀是一致的。
+图像，`视差图`支持`pfm/tiff`格式的`float32`图像，请固定文件的开头，并保证`深度图`、`视差图`、`左图`的后缀是一致的。
 
 3. 批量渲染
 
@@ -50,6 +50,8 @@ python render.py --img_path=D:\3_HoBot\3_RDK_X3_X5\14_Stereo\render\template\dep
 | need_speckle_filter | True                      | bool   | 是否需要speckle filter，会去除深度图/视差图的散点            |
 
 ## 结果展示
+
+此处深度图、视差图都是按照默认参数执行得到的结果，深度图渲染范围[0-10m]，视差图渲染范围[2.0-192.0]
 
 | 相机类型  | 深度渲染结果                                        | 视差渲染结果                                      |
 |-------|-----------------------------------------------|---------------------------------------------|
