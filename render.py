@@ -9,6 +9,7 @@ import cv2
 import imageio
 import numpy as np
 import matplotlib.pyplot as plt
+import random
 
 parser = argparse.ArgumentParser(description="Depth Render")
 parser.add_argument('--img_dir', type=str, default=r'', help='render multiple frames of images')
@@ -20,10 +21,11 @@ parser.add_argument('--min_depth', type=float, default=0.0, help='min depth')
 parser.add_argument('--max_depth', type=float, default=10000.0, help='max depth')
 parser.add_argument('--save_dir', type=str, default=r'', help='directory to save results')
 parser.add_argument('--save_gif', type=bool, default=False, help='save gif result')
+parser.add_argument('--save_mp4', type=bool, default=False, help='save mp4 result')
 parser.add_argument('--need_left_img', type=bool, default=False, help='gif image with left image')
 parser.add_argument('--need_speckle_filter', type=bool, default=True, help='need speckle filter')
+parser.add_argument('--need_value_show', type=bool, default=True, help='need value show')
 args = parser.parse_args()
-
 
 # args.img_dir = r'D:\3_HoBot\3_RDK_X3_X5\14_Stereo\render\stereonet_images_zed2i_1'
 # args.img_dir = r'D:\3_HoBot\3_RDK_X3_X5\14_Stereo\render\stereonet_images_zed2i_2'
@@ -32,11 +34,65 @@ args = parser.parse_args()
 # args.img_dir = r'D:\3_HoBot\3_RDK_X3_X5\14_Stereo\render\stereonet_images_s316_1'
 # args.img_dir = r'D:\3_HoBot\3_RDK_X3_X5\14_Stereo\render\stereonet_images_s316_2'
 # args.img_dir = r'D:\3_HoBot\3_RDK_X3_X5\14_Stereo\render\view_rock_data'
-# args.img_type = 'disp'
+
 # args.save_dir = os.path.split(args.img_dir)[0] + fr'\render_{args.img_type}_' + os.path.split(args.img_dir)[1]
 # args.save_gif = True
 # args.need_left_img = True
+# args.img_dir = r'C:\StereoDataset\zed2i\zed2i-distance\20250220155025_38085162_NEURAL'
+# args.img_dir = r'C:\StereoDataset\zed2i\zed2i-distance\20250220170229_38085162_NEURAL'
+# args.img_dir = r'C:\StereoDataset\zed2i\zed2i-distance\20250220170917_38085162_NEURAL'
+# args.img_dir = r'C:\StereoDataset\zed2i\zed2i-distance\20250220171321_38085162_NEURAL'
+# args.img_dir = r'C:\StereoDataset\zed2i\zed2i-distance\20250220172241_38085162_NEURAL'
+# args.img_dir = r'C:\StereoDataset\zed2i\zed2i-dataline\20250220172647_38085162_NEURAL'
+# args.img_dir = r'C:\StereoDataset\zed2i\zed2i-dataline\20250220172913_38085162_NEURAL'
+# args.img_dir = r'C:\StereoDataset\realsensed455\20250220_D455_215122252596_GT'
+# args.img_dir = r'C:\StereoDataset\zed2i\zed2i-room\20250220174025_38085162_NEURAL'
+# args.img_dir = r'C:\StereoDataset\realsensed455\20250220_D455_215122252596_room'
+# args.img_dir = r'C:\StereoDataset\yg\room'
+# args.img_dir = r'C:\StereoDataset\realsensed455\20250224145751_D455_215122252596'
+# args.img_dir = r'C:\StereoDataset\realsensed455\20250225152258_D455_215122252596_createcity1'
+# args.img_path = r'C:\StereoDataset\realsensed455\20250220_D455_215122252596_GT\001-20250220170512-ep-1-g-1-lp-1-depth.png'
+# args.img_path = r'C:\StereoDataset\zed2i\zed2i-distance\20250220170229_38085162_NEURAL\000013_depth.pfm'
+# args.img_path = r'C:\StereoDataset\yg\GT060cm\depth000069.png'
+# args.img_path = r'C:\StereoDataset\yg\road\depth000257.png'
 
+# args.img_path = r'C:\StereoDataset\yg\road\depth000833.png'
+# args.img_path = r'C:\StereoDataset\realsensed455\20250224145751_D455_215122252596_road\534-20250224150157-ep-1-g-1-lp-1-depth.png'
+# args.img_path = r'C:\StereoDataset\zed2i\zed2i-road\20250224145658_38085162_NEURAL\000797_depth.pfm'
+
+# args.img_path = r'C:\StereoDataset\yg\createcity1\depth000833.png'
+# args.img_path = r'C:\StereoDataset\realsensed455\20250225152258_D455_215122252596_createcity1\406-20250225153003-ep-1-g-1-lp-1-depth.png'
+# args.img_path = r'C:\StereoDataset\zed2i\zed2i-createcity1\20250225151823_38085162_NEURAL\000985_depth.pfm'
+
+# args.img_path = r'C:\StereoDataset\yg\room\depth001049.png'
+# args.img_path = r'C:\StereoDataset\realsensed455\20250306213625_D455_215122252596_room2\171-20250306214101-ep-1-g-1-lp-1-depth.png'
+# args.img_path = r'D:\zed2i-room2\20250306213713_38085162_NEURAL\001325_depth.pfm'
+# args.img_path = r'C:\StereoDataset\distance\zed2i\20250312151655_38085162_NEURAL_min'
+# args.img_dir = r'C:\StereoDataset\distance\realsense\20250312154803_D455_215122252596_50cm'
+# root_dir = r'C:\StereoDataset\distance\zed2i'
+# root_dir = r'C:\StereoDataset\distance\realsense'
+# sub_dir = os.listdir(root_dir)
+# args.img_dir = os.path.join(root_dir, sub_dir[4])
+# args.img_dir = r'C:\StereoDataset\distance\yg\stereonet_images_300cm'
+# args.img_dir = r'C:\StereoDataset\tree\Realsense\20250325165402_D455_215122252596'
+# args.img_dir = r'C:\StereoDataset\tree\yx\tree'
+# args.img_dir = r'C:\StereoDataset\pr\Realsense1'
+# args.img_dir = r'C:\StereoDataset\pr\Realsense2'
+# args.img_dir = r'C:\StereoDataset\pr\Realsense3'
+# args.img_dir = r'C:\Users\zhikang.zeng\Downloads\Motorcycle-perfect'
+# args.need_left_img = False
+# args.img_type = 'disp'
+# args.max_disp = 2000
+# args.need_value_show = False
+# if 'yg' in args.img_dir or 'yx' in args.img_dir or 'drobotics' in args.img_dir:
+#     args.need_speckle_filter = True
+# else:
+#     args.need_speckle_filter = False
+# args.save_dir = os.path.split(args.img_dir)[0] + fr'\render_{args.img_type}_' + os.path.split(args.img_dir)[1]
+# # args.save_dir = os.path.split(args.img_path)[0] + fr'\..\render_{args.img_type}_' + os.path.split(os.path.split(args.img_path)[0])[1]
+# args.save_gif = False
+# args.save_mp4 = False
+# args.max_depth = 20000
 
 def is_cv16uc1(image):
     # 检查图像数据类型和通道数
@@ -58,8 +114,10 @@ if __name__ == '__main__':
     max_depth = args.max_depth
     save_dir = args.save_dir
     save_gif = args.save_gif
+    save_mp4 = args.save_mp4
     need_left_img = args.need_left_img
     need_speckle_filter = args.need_speckle_filter
+    need_value_show = args.need_value_show
     print('=> args: ')
     print(f'       img_dir: {img_dir}')
     print(f'       img_path: {img_path}')
@@ -70,20 +128,23 @@ if __name__ == '__main__':
     print(f'       max_depth: {max_depth}')
     print(f'       save_dir: {save_dir}')
     print(f'       save_gif: {save_gif}')
+    print(f'       save_mp4: {save_mp4}')
     print(f'       need_left_img: {need_left_img}')
     print(f'       need_speckle_filter: {need_speckle_filter}')
+    print(f'       need_value_show: {need_value_show}')
     try:
         assert img_type in ['depth', 'disp']
     except:
         print('=> img_type needs to be set to [depth, disp]')
 
-    waitkey_time = 200
+    waitkey_time = 10
     if img_path != '':
         img_path_list = [img_path]
-        waitkey_time = 0
+        # waitkey_time = 0
     elif img_dir != '':
         img_path_list = [os.path.join(img_dir, filename) for filename in os.listdir(img_dir) if
-                         filename.startswith(img_type) or filename.endswith('.tiff')]
+                         (img_type in filename and 'color' not in filename) or filename.endswith('.tiff')]
+        # img_path_list = random.sample(img_path_list, 10)
     else:
         print('=> please enter image path!')
         exit(0)
@@ -99,6 +160,7 @@ if __name__ == '__main__':
         # read img
         print(f'=> process {org_img_path}')
         org_img = cv2.imread(org_img_path, cv2.IMREAD_UNCHANGED)
+        org_img[org_img == np.inf] = 0
         print(f'=> org_img [min, max]: [{org_img.min():.2f}, {org_img.max():.2f}]')
 
         # Limit the max and min values
@@ -109,9 +171,9 @@ if __name__ == '__main__':
             org_img[org_img < min_disp] = 0
             org_img[org_img > max_depth] = 0
         if img_type == 'depth':
-            if not is_cv16uc1(org_img):
-                print('=> depth image format error!')
-                continue
+            # if not is_cv16uc1(org_img):
+            #     print('=> depth image format error!')
+            #     continue
             org_img[org_img < min_depth] = 0
             org_img[org_img > max_depth] = 0
         print(f'=> limit org_img [min, max]: [{org_img.min():.2f}, {org_img.max():.2f}]')
@@ -169,6 +231,32 @@ if __name__ == '__main__':
             if os.path.exists(left_filepath):
                 left_img = cv2.imread(left_filepath, cv2.IMREAD_COLOR)
                 colored_img = np.vstack((left_img, colored_img))
+                if need_value_show and img_type == 'depth':
+                    h, w, c = colored_img.shape
+                    x_step_num = 6
+                    y_step_num = 12
+                    x_step = w // x_step_num
+                    y_step = h // y_step_num
+                    for j in range(y_step_num):
+                        cv2.line(colored_img, (0, j * y_step), (w, j * y_step), (255, 255, 255), 1)
+                    for i in range(x_step_num):
+                        cv2.line(colored_img, (i * x_step, 0), (i * x_step, h), (255, 255, 255), 1)
+                    for i in range(1, x_step_num):
+                        for j in range(1, y_step_num):
+                            try:
+                                font_size = 1.0 if w >= 1280 else 0.5
+                                depth_val = org_img[i * y_step, j * x_step]
+                                cv2.putText(colored_img, f'{depth_val / 1000:.3f}m', (j * x_step + 3, i * y_step - 3),
+                                            cv2.FONT_HERSHEY_SIMPLEX, font_size, (255, 255, 255), 2)
+                                cv2.putText(colored_img, f'{depth_val / 1000:.3f}m',
+                                            (j * x_step + 3, h // 2 + i * y_step - 6), cv2.FONT_HERSHEY_SIMPLEX, font_size,
+                                            (255, 255, 255), 2)
+                            except:
+                                continue
+
+                    print(x_step, y_step)
+        cv2.namedWindow("render img", cv2.WINDOW_NORMAL)
+        cv2.resizeWindow("render img", 640, 800)
         cv2.imshow("render img", colored_img)
         cv2.waitKey(waitkey_time)
 
@@ -182,7 +270,7 @@ if __name__ == '__main__':
             imageio.imwrite(result_filepath, colored_img)
             print(f'=> save render result to {result_filepath}')
 
-            if save_gif:
+            if save_gif or save_mp4:
                 gif_frames.append(colored_img)
 
     if os.path.exists(save_dir) and save_gif and len(gif_frames) > 2:
@@ -190,3 +278,19 @@ if __name__ == '__main__':
         result_filepath = os.path.join(save_dir, 'result.gif')
         print(f'=> save gif result to {result_filepath}')
         imageio.mimsave(result_filepath, gif_frames, fps=5, loop=0)
+
+    if os.path.exists(save_dir) and save_mp4 and len(gif_frames) > 2:
+        result_filepath = os.path.join(save_dir, 'result.mp4')
+        height, width, _ = gif_frames[0].shape
+        # 定义视频编码器和输出对象
+        fourcc = cv2.VideoWriter_fourcc(*"mp4v")  # 使用 'mp4v' 编码
+        video_writer = cv2.VideoWriter(result_filepath, fourcc, 5, (width, height))
+
+        # 写入每帧到视频文件
+        for image in gif_frames:
+            frame = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
+            video_writer.write(frame)
+
+        # 释放资源
+        video_writer.release()
+        print(f"=> mp4 save to: {result_filepath}")
